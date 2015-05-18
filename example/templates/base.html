@@ -1,0 +1,31 @@
+{% load rbac_tags %}
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+
+<head>
+    <title>RBAC Test page</title>
+</head>
+
+<body>
+
+    <h1>RBAC test page</h1>
+
+    <p>You are viewing this page, which means RBAC permissions have been passed from the view.</p>
+
+    {% if_rbac_permission owner model_inst operation roles %}
+        <p>RBAC permission template tag test passed, you are allowed to perform the operation <b>{{ operation }}</b> over the object <b>{{ model_inst }}</b>, whose owner is <b>{{ owner }}</b>, with the roles {% for r in roles %} <b>{{ r }}</b>{% endfor %}.</p>
+    {% else %}
+        <p style="color: red;">RBAC permission template tag test NOT passed</p>
+    {% endif_rbac_permission %}
+
+    {% if_rbac_generic_permission owner model operation roles %}
+        <p>RBAC generic permission template tag test passed, you are allowed to perform the operation <b>{{ operation }}</b> over the model <b>{{ model }}</b>, whose owner is <b>{{ owner }}</b>, with the roles {% for r in roles %} <b>{{ r }}</b>{% endfor %}.</p>
+    {% else %}
+        <p style="color: red;">RBAC generic permission template tag test NOT passed</p>
+    {% endif_rbac_generic_permission %}
+</body>
+
+</html>
