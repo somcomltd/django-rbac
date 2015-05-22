@@ -125,7 +125,7 @@ class Permission(models.Model):
         ordering = ['object_ct', 'object_id']
 
     def __unicode__(self):
-        return '%s | %s | %s' % (self.object, self.operation)
+        return '%s | %s' % (self.object, self.operation)
 
 
 class GenericPermission(models.Model):
@@ -139,4 +139,4 @@ class GenericPermission(models.Model):
         unique_together = ('content_type', 'operation')
 
     def __unicode__(self):
-        return '%s | %s | %s' % (self.content_type, self.operation)
+        return '%s | %s' % (self.content_type, self.operation)
