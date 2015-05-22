@@ -17,21 +17,19 @@ def _get_permission(queryset_model, filters, roles):
 
 class PermissionManager(models.Manager):
 
-    def _get_filters(self, owner, model_inst, operation):
-        owner_ct = ContentType.objects.get_for_model(owner)
+    def _get_filters(self, model_inst, operation):
         model_ct = ContentType.objects.get_for_model(model_inst)
-        filters = {'owner_ct': owner_ct, 'owner_id': owner.id,
-                   'object_ct': model_ct, 'object_id': model_inst.id,
+        filters = {'object_ct': model_ct, 'object_id': model_inst.id,
                    'operation': operation}
         return filters
 
-    def get_permission(self, owner, model, operation, roles):
-        filters = self._get_filters(owner, model, operation)
+    def get_permission(self, model, operation, roles):
+        filters = self._get_filters(model, operation)
         queryset_model = Permission
         return _get_permission(queryset_model, filters, roles)
 
-    def create_permission(self, owner, model_inst, operation, roles):
-        filters = self._get_filters(owner, model_inst, operation)
+    def create_permission(self, model_inst, operation, roles):
+        filters = self._get_filters(model_inst, operation)
         permission = Permission.objects.create(**filters)
         for role in roles:
             permission.roles.add(role)
@@ -40,20 +38,18 @@ class PermissionManager(models.Manager):
 
 class GenericPermissionManager(models.Manager):
 
-    def _get_filters(self, owner, model, operation):
-        owner_ct = ContentType.objects.get_for_model(owner)
+    def _get_filters(self, model, operation):
         model_ct = ContentType.objects.get_for_model(model)
-        filters = {'owner_ct': owner_ct, 'owner_id': owner.id,
-                   'content_type': model_ct, 'operation': operation}
+        filters = {'content_type': model_ct, 'operation': operation}
         return filters
 
-    def get_permission(self, owner, model, operation, roles):
-        filters = self._get_filters(owner, model, operation)
+    def get_permission(self, model, operation, roles):
+        filters = self._get_filters(model, operation)
         queryset_model = GenericPermission
         return _get_permission(queryset_model, filters, roles)
 
-    def create_permission(self, owner, model, operation, roles):
-        filters = self._get_filters(owner, model, operation)
+    def create_permission(self, model, operation, roles):
+        filters = self._get_filters(model, operation)
         permission = GenericPermission.objects.create(**filters)
         for role in roles:
             permission.roles.add(role)
@@ -115,39 +111,32 @@ class Relationship(models.Model):
 
 
 class Permission(models.Model):
-    owner_ct = models.ForeignKey(ContentType, related_name='permission_owner')
-    owner_id = models.PositiveIntegerField()
     object_ct = models.ForeignKey(ContentType, related_name='permission_object')
     object_id = models.PositiveIntegerField()
     operation = models.ForeignKey(Operation)
     roles = models.ManyToManyField(Role, related_name='permissions')
 
-    owner = generic.GenericForeignKey('owner_ct', 'owner_id')
     object = generic.GenericForeignKey('object_ct', 'object_id')
 
     objects = PermissionManager()
 
     class Meta:
-        unique_together = ('owner_ct', 'owner_id', 'object_ct', 'object_id', 'operation')
-        ordering = ['owner_ct', 'owner_id', 'object_ct', 'object_id']
+        unique_together = ('object_ct', 'object_id', 'operation')
+        ordering = ['object_ct', 'object_id']
 
     def __unicode__(self):
-        return '%s | %s | %s' % (self.owner, self.object, self.operation)
+        return '%s | %s | %s' % (self.object, self.operation)
 
 
 class GenericPermission(models.Model):
-    owner_ct = models.ForeignKey(ContentType, related_name='generic_permission_owner')
-    owner_id = models.PositiveIntegerField()
     content_type = models.ForeignKey(ContentType, related_name='generic_permission_model')
     operation = models.ForeignKey(Operation)
     roles = models.ManyToManyField(Role, related_name='generic_permissions')
 
-    owner = generic.GenericForeignKey('owner_ct', 'owner_id')
-
     objects = GenericPermissionManager()
 
     class Meta:
-        unique_together = ('owner_ct', 'owner_id', 'content_type', 'operation')
+        unique_together = ('content_type', 'operation')
 
     def __unicode__(self):
-        return '%s | %s | %s' % (self.owner, self.content_type, self.operation)
+        return '%s | %s | %s' % (self.content_type, self.operation)
