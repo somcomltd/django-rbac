@@ -5,7 +5,7 @@ from rest_framework import viewsets
 
 from rbac.models import Role, Relationship
 
-from rbac.serializers import RelationshipSerializer, ContentTypeSerializer
+from rbac.serializers import RoleSerializer, RelationshipSerializer, ContentTypeSerializer
 
 
 # API views
