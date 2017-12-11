@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+try:
+    from django.contrib.contenttypes.generic import GenericForeignKey
+except ImportError:
+    from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -97,8 +100,8 @@ class Relationship(models.Model):
     target_subject_id = models.PositiveIntegerField()
     role = models.ForeignKey(Role)
 
-    subject = generic.GenericForeignKey('subject_ct', 'subject_id')
-    target_subject = generic.GenericForeignKey('target_subject_ct', 'target_subject_id')
+    subject = GenericForeignKey('subject_ct', 'subject_id')
+    target_subject = GenericForeignKey('target_subject_ct', 'target_subject_id')
 
     objects = RelationshipManager()
 
@@ -116,7 +119,7 @@ class Permission(models.Model):
     operation = models.ForeignKey(Operation)
     roles = models.ManyToManyField(Role, related_name='permissions')
 
-    object = generic.GenericForeignKey('object_ct', 'object_id')
+    object = GenericForeignKey('object_ct', 'object_id')
 
     objects = PermissionManager()
 
